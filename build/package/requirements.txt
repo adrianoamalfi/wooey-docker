@@ -1,0 +1,3 @@
+honcho==1.0.1
+psycopg2==2.8.6
+wooey==0.12.0

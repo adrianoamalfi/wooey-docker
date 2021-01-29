@@ -1,0 +1,72 @@
+FROM arm32v7/python:3.9.1-alpine as base
+FROM base as builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 
+ENV PYTHONUNBUFFERED=1 
+ENV PYTHONPATH=:. 
+
+RUN apk update --no-cache \
+   && apk add build-base postgresql-dev libpq --no-cache --virtual .build-deps  
+
+
+RUN mkdir /install
+WORKDIR /install
+COPY requirements.txt /requirements.txt
+RUN pip install --prefix=/install -r /requirements.txt
+
+FROM base
+
+ARG APPLICATION="myapp"
+ARG BUILD_RFC3339="1970-01-01T00:00:00Z"
+ARG REVISION="local"
+ARG DESCRIPTION="no description"
+ARG PACKAGE="user/repo"
+ARG VERSION="dirty"
+
+STOPSIGNAL SIGKILL
+
+LABEL org.opencontainers.image.ref.name="${PACKAGE}" \
+      org.opencontainers.image.created=$BUILD_RFC3339 \
+      org.opencontainers.image.authors="Adriano Amalfi <adrianoamalfi@gmail.com>" \
+      org.opencontainers.image.documentation="https://github.com/${PACKAGE}/README.md" \
+      org.opencontainers.image.description="${DESCRIPTION}" \
+      org.opencontainers.image.licenses="GPLv3" \
+      org.opencontainers.image.source="https://github.com/${PACKAGE}" \
+      org.opencontainers.image.revision=$REVISION \
+      org.opencontainers.image.version=$VERSION \
+      org.opencontainers.image.url="https://hub.docker.com/r/${PACKAGE}/"
+
+ENV \
+      APPLICATION="${APPLICATION}" \
+      BUILD_RFC3339="${BUILD_RFC3339}" \
+      REVISION="${REVISION}" \
+      DESCRIPTION="${DESCRIPTION}" \
+      PACKAGE="${PACKAGE}" \
+      VERSION="${VERSION}"
+
+ENV PYTHONDONTWRITEBYTECODE=1 
+ENV PYTHONUNBUFFERED=1 
+ENV PYTHONPATH=:. 
+
+RUN apk add postgresql-libs libpq --no-cache
+
+COPY --from=builder /install /usr/local
+
+RUN wooify -p wooeyp
+
+WORKDIR /wooeyp 
+VOLUME [/wooeyp/wooeyp/user_uploads] 
+
+COPY ./Procfile . 
+COPY ./docker-entrypoint.sh .
+
+ENV DJANGO_DB_NAME=default 
+ENV DJANGO_SU_NAME=admin 
+ENV DJANGO_SU_EMAIL=admin@example.com
+ENV DJANGO_SU_PASSWORD=changeme 
+ENV DJANGO_SETTINGS_MODULE=wooeyp.settings 
+
+RUN python -c "import django; django.setup(); from django.contrib.auth.management.commands.createsuperuser import get_user_model; get_user_model()._default_manager.db_manager('$DJANGO_DB_NAME').create_superuser( username='$DJANGO_SU_NAME', email='$DJANGO_SU_EMAIL', password='$DJANGO_SU_PASSWORD')" # buildkit 418kB buildkit.dockerfile.v0
+
+EXPOSE 8000
+ENTRYPOINT ["sh", "./docker-entrypoint.sh"] 
