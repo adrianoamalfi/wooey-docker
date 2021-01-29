@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-if [ "$1" = 'wooify' ]; then
+if [ "$1" = 'start' ]; then
 
     if [ -z "$(ls -A /wooeyp)" ]; then
         python manage.py makemigrations
@@ -9,7 +9,7 @@ if [ "$1" = 'wooify' ]; then
         python manage.py collectstatic --noinput  # Collect static files
     fi
 
-    exec honcho start "$@"
+    exec honcho "$@"
 fi
 
 exec "$@"

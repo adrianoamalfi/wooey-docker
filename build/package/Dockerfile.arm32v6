@@ -70,3 +70,6 @@ RUN python -c "import django; django.setup(); from django.contrib.auth.managemen
 
 EXPOSE 8000
 ENTRYPOINT ["sh", "./docker-entrypoint.sh"] 
+
+STOPSIGNAL SIGINT
+CMD ["start"]

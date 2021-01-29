@@ -72,4 +72,4 @@ EXPOSE 8000
 ENTRYPOINT ["sh", "./docker-entrypoint.sh"] 
 
 STOPSIGNAL SIGINT
-CMD ["wooify"]
+CMD ["start"]
