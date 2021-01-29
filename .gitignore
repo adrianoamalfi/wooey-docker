@@ -1,3 +1,4 @@
 manifest-tool*
 qemu-*-static
 gitcommands.txt
+local/*
