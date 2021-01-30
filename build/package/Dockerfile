@@ -51,14 +51,29 @@ ENV PYTHONPATH=:.
 RUN apk add postgresql-libs libpq --no-cache
 
 COPY --from=builder /install /usr/local
+WORKDIR /code
+# RUN wooify -p wooeyp
 
-RUN wooify -p wooeyp
+ENV USER=wooey
+ENV UID=1000
+ENV GID=1000
 
-WORKDIR /wooeyp 
+RUN addgroup -g "$GID" "$USER"
+
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "$(pwd)" \
+    --ingroup "$USER" \
+    --no-create-home \
+    --uid "$UID" \
+    "$USER"
+
+RUN chown -R $USER:$USER /code
+
+#WORKDIR /wooeyp 
+
 #VOLUME [/wooeyp/wooeyp/user_uploads] 
-
-COPY ./Procfile . 
-COPY ./docker-entrypoint.sh .
 
 ENV DJANGO_DB_NAME=default 
 ENV DJANGO_SU_NAME=admin 
@@ -66,10 +81,11 @@ ENV DJANGO_SU_EMAIL=admin@example.com
 ENV DJANGO_SU_PASSWORD=changeme 
 ENV DJANGO_SETTINGS_MODULE=wooeyp.settings 
 
-RUN python -c "import django; django.setup(); from django.contrib.auth.management.commands.createsuperuser import get_user_model; get_user_model()._default_manager.db_manager('$DJANGO_DB_NAME').create_superuser( username='$DJANGO_SU_NAME', email='$DJANGO_SU_EMAIL', password='$DJANGO_SU_PASSWORD')" # buildkit 418kB buildkit.dockerfile.v0
+COPY ./Procfile /
+COPY ./docker-entrypoint.sh /
 
 EXPOSE 8000
-ENTRYPOINT ["sh", "./docker-entrypoint.sh"] 
+ENTRYPOINT ["sh", "/docker-entrypoint.sh"] 
 
 STOPSIGNAL SIGINT
-CMD ["wooify"]
+CMD ["start"]
