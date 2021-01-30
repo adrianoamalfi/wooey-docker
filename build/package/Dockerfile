@@ -51,11 +51,28 @@ ENV PYTHONPATH=:.
 RUN apk add postgresql-libs libpq --no-cache
 
 COPY --from=builder /install /usr/local
-
+WORKDIR /code
 # RUN wooify -p wooeyp
 
+ENV USER=wooey
+ENV UID=1000
+ENV GID=1000
+
+RUN addgroup -g "$GID" "$USER"
+
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "$(pwd)" \
+    --ingroup "$USER" \
+    --no-create-home \
+    --uid "$UID" \
+    "$USER"
+
+RUN chown -R $USER:$USER /code
+
 #WORKDIR /wooeyp 
-WORKDIR /code
+
 #VOLUME [/wooeyp/wooeyp/user_uploads] 
 
 ENV DJANGO_DB_NAME=default 
