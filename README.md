@@ -2,13 +2,19 @@
 
 ## wooey-multi-arch v1 - Example usage
 
-Start Wooey:
+Start Wooey (Simple):
 
 ```bash
-docker run -d -p 8000:8000 adrianoamalfi/wooey-multi-arch:latest
+docker run -p 8000:8000 adrianoamalfi/wooey-docker:latest
 ```
 
-Connect to http://localhost:8000 
+Start Wooey (local consistence & daemon mode):
+
+```bash
+docker run -p 8000:8000 -v $(pwd)/local:/code -d adrianoamalfi/wooey-docker:latest
+```
+
+Connect to http://IPADDRESS:8000 
 Username: admin
 Password: changeme
 
