@@ -1,5 +1,4 @@
-FROM arm32v6/python:3.9.1-alpine as base
-FROM base as builder
+FROM arm32v6/python:3.9.1-alpine 
 
 ENV PYTHONDONTWRITEBYTECODE=1 
 ENV PYTHONUNBUFFERED=1 
@@ -13,8 +12,6 @@ RUN mkdir /install
 WORKDIR /install
 COPY requirements.txt /requirements.txt
 RUN pip install --prefix=/install -r /requirements.txt
-
-FROM base
 
 ARG APPLICATION="myapp"
 ARG BUILD_RFC3339="1970-01-01T00:00:00Z"
