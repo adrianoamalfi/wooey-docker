@@ -5,7 +5,7 @@
 Start Wooey:
 
 ```bash
-docker run -d -p 8000:8000 -p 80:80  adrianoamalfi/wooey-multi-arch:latest
+docker run -d -p 8000:8000 adrianoamalfi/wooey-multi-arch:latest
 ```
 
 Connect to http://localhost:8000 
